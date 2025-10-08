@@ -1,234 +1,180 @@
-Guía de Estudio: AWS Certified AI Practitioner - Dominio 3
-Este documento detalla la aplicación práctica de los modelos fundacionales (FM), incluyendo consideraciones de diseño, ingeniería de peticiones, refinamiento y evaluación.
+# Guía de Estudio: AWS Certified AI Practitioner - Dominio 3
 
-3.1 Consideraciones de Diseño de Aplicaciones con FM  (Modelos Fundacionales) ⚙️
-Esta sección cubre los criterios para seleccionar un modelo, el impacto de los parámetros de inferencia y las arquitecturas de diseño como RAG.
+Este documento detalla la aplicación práctica de los modelos fundacionales (FM), incluyendo consideraciones de diseño, ingeniería de peticiones (prompt engineering), refinamiento y evaluación.
 
-Criterios para Seleccionar un Modelo Previamente Entrenado
-Al elegir un FM, es crucial balancear varios factores para que se ajuste a los requisitos del proyecto.
+---
 
+## 3.1 Consideraciones de Diseño de Aplicaciones con FM (Modelos Fundacionales) ⚙️
 
-Coste vs. Rendimiento: Debes encontrar un equilibrio entre el coste de entrenamiento/mantenimiento y el rendimiento del modelo. Un modelo ligeramente menos preciso puede ser significativamente más barato.
+Esta sección cubre los criterios para seleccionar un modelo, el impacto de los parámetros de inferencia y arquitecturas de diseño como RAG.
 
+### Criterios para seleccionar un modelo previamente entrenado
 
+Al elegir un FM, es crucial balancear varios factores para que se ajuste a los requisitos del proyecto:
 
-Latencia y Velocidad de Inferencia: Para aplicaciones en tiempo real (ej. vehículos autónomos), la velocidad a la que un modelo genera predicciones es crítica. Modelos complejos pueden tener tiempos de inferencia mayores, lo que podría no cumplir los requisitos de latencia.
+- Coste vs. rendimiento  
+  - Debes encontrar un equilibrio entre el coste de entrenamiento/despliegue y la precisión/ calidad. A veces un modelo menos preciso pero mucho más barato y rápido es la opción correcta.
 
+- Latencia y velocidad de inferencia  
+  - Para aplicaciones en tiempo real (ej. vehículos autónomos o chat en vivo) la velocidad es crítica. Modelos grandes pueden ofrecer mejor calidad pero con mayor latencia.
 
+- Modalidades  
+  - Considera si la aplicación necesita una sola modalidad (texto) o varias (multimodal: texto, imagen, audio). También valora capacidades multilingües.
 
+- Arquitectura y complejidad  
+  - Diferentes arquitecturas se adaptan mejor a distintas tareas (ej. CNN para imágenes, transformadores para lenguaje). Modelos con más parámetros suelen requerir más recursos.
 
-Modalidades: Considera si tu aplicación necesita procesar un solo tipo de datos (texto) o múltiples (multimodal). También, si requieres capacidades multilingües, debes elegir modelos entrenados en los idiomas pertinentes.
+- Disponibilidad y compatibilidad  
+  - Verifica la licencia, documentación, soporte y compatibilidad con tu infraestructura (frameworks, hardware).
 
+- Interpretabilidad vs. explicabilidad  
+  - Los FM suelen ser cajas negras; si necesitas interpretabilidad matemática o explicaciones detalladas, evalúa técnicas complementarias (explainers, LIME/SHAP, etc.).
 
+### Parámetros de inferencia
 
-Arquitectura y Complejidad: Diferentes arquitecturas son mejores para distintas tareas (ej. CNN para imágenes, RNN para NLP). Modelos más complejos (más parámetros, más capas) pueden ser más precisos pero requieren más recursos computacionales.
+Son valores ajustables que controlan cómo el modelo genera respuestas:
 
+- Para aleatoriedad y diversidad:
+  - Temperatura: controla creatividad (valores más altos → más aleatorio).
+  - Top-k / Top-p (nucleus sampling): limitan la selección de tokens a los más probables o al conjunto acumulado de probabilidad.
+  - Amazon Bedrock y otros servicios soportan estos parámetros para controlar la generación.
 
+- Para limitar la longitud:
+  - Máximo de tokens / longitud de respuesta.
+  - Penalizaciones por repetición y por longitud.
+  - Secuencias de parada (stop sequences) para cortar la salida en puntos concretos.
 
+### Generación Aumentada por Recuperación (RAG)
 
-Disponibilidad y Compatibilidad: Verifica que el modelo sea compatible con tu entorno y que tenga la licencia y documentación adecuadas. Revisa si el modelo se mantiene y actualiza regularmente.
+RAG mejora la fidelidad del FM conectándolo a fuentes externas de conocimiento.
 
+- ¿Qué es?  
+  - Técnica que recupera información relevante (por ejemplo, desde una base de conocimiento vectorial) y la concatena a la petición antes de enviarla al LLM.
 
+- ¿Por qué usar RAG?
+  - Mitiga alucinaciones al proporcionar evidencia factual.
+  - Permite acceso a conocimiento actualizado sin reentrenar el modelo completo.
 
-Interpretabilidad vs. Explicabilidad: Los FM son "cajas negras" extremadamente complejas, lo que los hace no interpretables. Si la capacidad de interpretar matemáticamente las decisiones del modelo es un requisito, los FM podrían no ser la mejor opción.
+- Bases de datos vectoriales  
+  - Almacenan incrustaciones (embeddings) que representan semánticamente texto o contenido multimedia para búsquedas rápidas por similitud.
 
+- Servicios de AWS que pueden usarse como parte de una solución RAG:
+  - Amazon OpenSearch Service (con plugins/vector search)
+  - Amazon Aurora con extensión pgvector
+  - Amazon Neptune
+  - Amazon RDS para PostgreSQL (con pgvector u otras extensiones)
+  - (Complementos: pipelines ETL y servicios de embeddings)
 
-Parámetros de Inferencia
-Son valores ajustables que controlan cómo el modelo genera una respuesta.
+### Agentes para tareas con varios pasos
 
-Para Aleatoriedad y Diversidad:
+- ¿Qué son?  
+  - Programas que organizan flujos de trabajo, usan FM para razonar y llaman a APIs o servicios para ejecutar acciones (reservar un vuelo, procesar órdenes).
 
-Temperatura: Controla la creatividad.
+- ¿Cómo funcionan?  
+  - Dividen tareas complejas en pasos, consultan fuentes externas, llaman a sistemas externos y gestionan estado y errores.
 
-Top K / Top P: Limitan la selección de tokens a los más probables.
+- Servicio de AWS relacionado:  
+  - Agents para Amazon Bedrock — capacidad administrada para crear y orquestar agentes que interactúan con modelos y APIs externas.
 
-Amazon Bedrock soporta estos parámetros para controlar la respuesta del modelo.
+---
 
-Para Limitar la Longitud:
+## 3.2 Técnicas de Ingeniería de Peticiones (Prompt Engineering) ✍️
 
-
-Longitud de la respuesta, penalizaciones y secuencias de parada son parámetros que se pueden usar para controlar el tamaño del resultado generado.
-
-Generación Aumentada por Recuperación (RAG)
-RAG es una técnica clave para mejorar los FM conectándolos a bases de conocimiento externas.
-
-
-
-¿Qué es? Es una técnica que aumenta la petición del usuario con información relevante recuperada de una fuente de datos externa (como una base de datos vectorial) antes de enviarla al LLM.
-
-¿Por qué usar RAG?
-
-
-Mitiga Alucinaciones: Proporciona al modelo datos fácticos y contextuales para basar sus respuestas, reduciendo la generación de información incorrecta.
-
-
-
-Combate el Conocimiento Desactualizado: Permite al modelo acceder a información actualizada sin necesidad de un costoso reentrenamiento.
-
-
-Bases de Datos Vectoriales: Son un componente central de RAG. Almacenan datos (texto, imágenes) como representaciones numéricas llamadas incrustaciones (embeddings). Esto permite una búsqueda rápida y eficiente de información semánticamente similar a la consulta del usuario.
-
-
-
-
-Servicios de AWS para Bases de Datos Vectoriales: Incluyen Amazon OpenSearch Service, Amazon Aurora (con la extensión pgvector), Amazon Neptune y Amazon RDS para PostgreSQL.
-
-
-Agentes para Tareas con Varios Pasos
-
-¿Qué son? Son programas que organizan flujos de trabajo y permiten a los FM ejecutar tareas reales que requieren interactuar con sistemas externos, como reservar un vuelo o procesar una orden de compra.
-
-
-
-¿Cómo funcionan? Desglosan tareas complejas, llaman a APIs para efectuar acciones y consultan bases de conocimiento para obtener información adicional.
-
-
-
-Servicio de AWS: Agents para Amazon Bedrock es una capacidad administrada que facilita la creación de estos agentes.
-
-3.2 Técnicas de Ingeniería de Peticiones (Prompt Engineering) ✍️
 Esta sección se enfoca en cómo comunicarse eficazmente con un LLM.
 
-Conceptos Fundamentales
+### Conceptos fundamentales
 
-Petición (Prompt): Es el conjunto de entradas que un usuario proporciona para guiar al LLM a generar una respuesta adecuada. Puede contener una instrucción, un contexto y un texto de entrada.
+- Petición (prompt): conjunto de entradas que guían la respuesta del LLM (instrucciones, contexto, ejemplos).
+- Espacio latente: conocimiento y patrones estadísticos codificados en el modelo. La petición explora ese espacio para generar la salida.
 
+### Técnicas comunes de petición
 
+- Zero-shot: pedir al modelo realizar una tarea sin ejemplos.
+- Few-shot: incluir algunos ejemplos en la petición para guiar el formato y estilo de salida.
+- Chain-of-Thought (Cadena de pensamiento): pedir al modelo que describa pasos intermedios para mejorar razonamiento en tareas complejas.
 
-Espacio Latente: Es el conocimiento estadístico y los patrones de lenguaje codificados dentro del modelo. Una petición consulta este espacio latente. Si el espacio latente del modelo carece de información sobre un tema, es más probable que alucine.
+### Prácticas recomendadas
 
+- Sé específico: define formato, estilo, longitud y restricciones.
+- Usa ejemplos: los ejemplos concretos suelen mejorar el resultado.
+- Experimenta: la ingeniería de prompts es iterativa; prueba y mide.
+- Conoce las limitaciones del modelo: evita pedir tareas para las cuales el modelo no está bien entrenado.
 
+### Riesgos y mitigación
 
-Técnicas Comunes de Peticiones
+- Inyección de peticiones: un usuario malicioso inserta instrucciones en el contexto.
+- Jailbreaking: intentos de eludir restricciones del modelo.
+- Secuestro (hijacking): manipular la petición original con nuevas instrucciones.
 
-Peticiones con Cero Muestras (Zero-shot): Se pide al modelo que realice una tarea sin darle ningún ejemplo previo.
+Mitigaciones:
+- Implementar guardrails, filtros de contenido y saneamiento de inputs.
+- Restringir y sanear datos que se incluyen en prompts.
+- Validar y aplicar políticas de seguridad y privacidad antes de ejecutar acciones críticas.
 
+---
 
-Peticiones con Pocas Muestras (Few-shot): Se proporcionan algunos ejemplos en la petición para ayudar al modelo a entender mejor la tarea y el formato de salida esperado.
+## 3.3 Entrenamiento y Refinamiento de Modelos 🛠️
 
+Describe cómo se crean y adaptan los modelos fundacionales.
 
-Cadena de Pensamiento (Chain-of-Thought): Para tareas complejas, se le pide al modelo que divida el proceso de razonamiento en pasos intermedios, mejorando la calidad del resultado final.
+### Procesos clave
 
-Prácticas Recomendadas
+- Pre-training (Entrenamiento previo): fase masiva y no supervisada donde el modelo aprende de grandes volúmenes de datos; es costosa en recursos.
+- Fine-tuning (Refinamiento): adaptar el FM a tareas específicas con datasets etiquetados más pequeños.
 
-Sé Específico: Proporciona instrucciones claras, incluyendo formato, estilo, tono y longitud deseada.
+### Técnicas de refinamiento
 
+- Olvido catastrófico: riesgo de que al afinar para una tarea se degrade rendimiento en otras tareas.
+- PEFT (Parameter-Efficient Fine-Tuning): técnicas que congelan la mayoría de parámetros y entrenan solo un conjunto pequeño (p. ej. adapters, LoRA), reduciendo costes y preservando conocimiento general.
+- Adaptación de dominio: refinar con datos específicos del sector para que el modelo aprenda jerga y términos técnicos.
+- RLHF (Reinforcement Learning from Human Feedback): usar calificaciones humanas para alinear salidas del modelo con preferencias y valores humanos.
 
-Usa Ejemplos: Incluye ejemplos del resultado que esperas.
+### Preparación de datos para el refinamiento
 
+- Recolección y preprocesamiento: limpieza, normalización y anonimización si aplica.
+- Divisiones: entrenamiento, validación y prueba.
+- Servicios de AWS para preparación y etiquetado:
+  - Amazon SageMaker Clarify: detección de sesgos y explicabilidad.
+  - Amazon SageMaker Ground Truth: flujos de trabajo de etiquetado de datos.
+  - Amazon SageMaker Canvas: herramientas low-code/no-code para flujos de datos.
 
-Experimenta: La ingeniería de peticiones es un proceso iterativo; prueba diferentes enfoques.
+---
 
+## 3.4 Evaluación del Rendimiento del Modelo 📊
 
-Conoce las Limitaciones del Modelo: Evalúa qué tan bien conoce el modelo un tema antes de crear peticiones complejas sobre él.
+Cómo medir si un modelo fundacional cumple los objetivos.
 
-Riesgos y Mitigación
+### Desafíos de la evaluación
 
-Inyección de Peticiones: Un ataque donde un usuario malicioso inserta instrucciones en una petición para generar una respuesta no deseada.
+- Modelos generativos son no deterministas: evaluación automática puede ser insuficiente.
+- Necesidad de métricas cualitativas y evaluación humana para tareas abiertas.
 
+### Métricas y benchmarks
 
-Jailbreaking: Intentar eludir las medidas de seguridad o barreras de protección del modelo.
+- Métricas específicas de tareas:
+  - ROUGE: evaluación de resúmenes.
+  - BLEU: evaluación de traducciones.
+- Benchmarks generales:
+  - GLUE y SuperGLUE: comprensión del lenguaje.
+  - MMLU: conocimientos y resolución multidominio.
+  - BIG-bench: tareas avanzadas que prueban límites de los modelos.
 
+### Métodos y herramientas de evaluación
 
-Secuestro (Hijacking): Manipular la petición original con nuevas instrucciones.
+- Evaluación humana: revisores que juzgan fidelidad, utilidad y seguridad.
+- Herramientas de AWS:
+  - Amazon Bedrock Model Evaluation: comparar respuestas de modelos con referencias humanas y calcular métricas (ej. BERTScore).
+  - Amazon SageMaker Clarify: soporte para evaluar aspectos relacionados con sesgos y calidad de datos/modelos.
 
+### Alineación con objetivos empresariales
 
-Mitigación: Usar barreras de protección (guardrails) para definir temas no deseados, bloquear palabras clave y filtrar contenido dañino o confidencial.
+- Define objetivos y métricas de éxito antes del despliegue.
+- Considera toda la arquitectura: infraestructuras, almacenamiento, latencia, UX.
+- Mide y supervisa continuamente: telemetría, alertas, pruebas A/B y revisiones periódicas.
 
-3.3 Entrenamiento y Refinamiento de Modelos 🛠️
-Esta sección describe cómo se crean y adaptan los modelos fundacionales.
+---
 
-Procesos Clave
-
-Entrenamiento Previo (Pre-training): Es el proceso inicial y masivo donde el modelo aprende de terabytes de datos no estructurados mediante aprendizaje autosupervisado. Es extremadamente costoso y requiere una enorme capacidad de cómputo (millones de horas de GPU).
-
-
-
-
-Refinamiento (Fine-tuning): Es un proceso de aprendizaje supervisado que adapta un modelo pre-entrenado a una tarea específica usando un conjunto de datos etiquetados más pequeño y específico. Ayuda a que el modelo se especialice en un dominio o caso de uso particular.
-
-
-Técnicas de Refinamiento
-
-Olvido Catastrófico: Ocurre cuando refinar un modelo para una sola tarea hace que pierda rendimiento en otras tareas.
-
-
-Refinamiento con Eficiencia de Parámetros (PEFT): Un conjunto de técnicas que congelan los parámetros del LLM original y solo entrenan un pequeño número de capas o parámetros nuevos. Esto reduce significativamente los costes de computación y memoria. LoRA (Low-Rank Adaptation) es una técnica popular de PEFT.
-
-
-
-
-Adaptación de Dominio: Refinar el modelo con datos específicos para que aprenda la jerga de un sector o términos técnicos.
-
-
-Aprendizaje por Refuerzo a partir de Comentarios Humanos (RLHF): Utiliza la retroalimentación humana para alinear mejor el modelo con las preferencias y valores humanos, mejorando la calidad de las respuestas.
-
-
-Preparación de Datos para el Refinamiento
-La preparación de datos consiste en recopilar, preprocesar y organizar los datos para el modelo.
-
-El conjunto de datos se divide en divisiones de entrenamiento, validación y prueba.
-
-Servicios de AWS para Preparación de Datos:
-
-
-Amazon SageMaker Clarify: Para detectar sesgos en los datos.
-
-
-Amazon SageMaker Ground Truth: Para administrar flujos de trabajo de etiquetado de datos.
-
-
-Amazon SageMaker Canvas: Para flujos de datos con poco código.
-
-3.4 Evaluación del Rendimiento del Modelo 📊
-Esta sección cubre cómo medir si un modelo fundacional es eficaz y cumple los objetivos.
-
-Desafíos de la Evaluación
-El resultado de los modelos generativos no es determinista, lo que hace que su evaluación sea más compleja que la de los modelos de ML tradicionales.
-
-Métricas y Puntos de Referencia (Benchmarks)
-Métricas Específicas de Tareas:
-
-
-ROUGE: Se usa para evaluar la calidad de resúmenes de texto.
-
-
-BLEU: Se usa para evaluar la calidad de traducciones automáticas.
-
-Benchmarks Generales:
-
-Se utilizan para comparar el rendimiento de diferentes LLMs en una amplia gama de tareas.
-
-Ejemplos incluyen: GLUE y SuperGLUE (comprensión general del lenguaje) , MMLU (conocimiento y resolución de problemas en múltiples dominios) , BIG-bench (tareas que superan las capacidades actuales) y HELM (para mejorar la transparencia de los modelos).
-
-
-
-
-
-Métodos y Herramientas de Evaluación
-
-Evaluación Humana: Utilizar personas para evaluar y comparar manualmente las respuestas de los modelos.
-
-Herramientas de AWS:
-
-
-Amazon Bedrock Model Evaluation: Permite comparar automáticamente las respuestas de los modelos con una referencia humana y calcular puntuaciones (ej. BERTscore) para evaluar la fidelidad y las alucinaciones.
-
-
-Amazon SageMaker Clarify: Se puede utilizar para crear trabajos de evaluación de modelos para LLMs.
-
-Alineación con Objetivos Empresariales
-Antes de implementar, define claramente los objetivos empresariales y las métricas de éxito.
-
-Considera la arquitectura completa de la aplicación, desde la infraestructura y el almacenamiento hasta la interfaz de usuario.
-
-
-Es fundamental medir, supervisar y revisar continuamente las métricas para evaluar si el modelo está cumpliendo sus objetivos y proporcionando valor.
-
-
-
-
-
-
-
-
+Notas finales
+- Antes de producción, realiza pruebas de seguridad, privacidad y cumplimiento.
+- Implementa observabilidad y pipelines de retraining o actualización de conocimiento (por ejemplo, actualizar índices RAG).
+- Mantén un proceso iterativo de mejora: pruebas, métricas, feedback humano y refinamiento continuo.
