@@ -1,101 +1,90 @@
-Guía de Estudio: AWS Certified AI Practitioner - Dominio 2
-Este documento resume los conceptos esenciales sobre los aspectos básicos de la IA generativa, sus aplicaciones empresariales y las herramientas de AWS correspondientes, basándose en la información de la transcripción.
+# Guía de Estudio: Directrices para la IA Responsable — Dominio 4
 
-2.1 Conceptos Básicos de la IA Generativa 🧠
-Esta sección cubre la definición, los componentes y el funcionamiento de la inteligencia artificial generativa.
+Este documento resume los conceptos esenciales para el desarrollo de sistemas de IA responsables, la importancia de la transparencia y las herramientas de AWS que ayudan a implementar estas prácticas, basándose en la transcripción proporcionada.
 
-Definición y Diferencias Clave
-IA Generativa: Es un subconjunto del aprendizaje profundo que se enfoca en generar contenido nuevo y original (texto, imágenes, audio, código), en lugar de solo clasificar o predecir sobre datos existentes.
-IA Tradicional: Se centra principalmente en clasificar o hacer predicciones basadas en datos de entrada.
-Modelos Fundacionales (FM): Son la base de la IA generativa. Son modelos de redes neuronales muy grandes y complejos, con miles de millones de parámetros, entrenados con enormes cantidades de datos. Cuantos más parámetros, más memoria y capacidad tiene el modelo para realizar tareas avanzadas.
-Arquitectura Clave: El Transformador
-El elemento principal de la IA generativa moderna es la red de transformadores, introducida en el artículo de 2017 "Attention is All You Need".
+## Tabla de contenidos
+- [4.1 Desarrollo de Sistemas de IA Responsable 🛡️](#41-desarrollo-de-sistemas-de-ia-responsable-🛡️)  
+  - [El desafío del sesgo y la fiabilidad](#el-desafío-del-sesgo-y-la-fiabilidad)  
+  - [Amazon SageMaker Clarify](#amazon-sagemaker-clarify)  
+  - [Métricas de sesgo clave](#métricas-de-sesgo-clave)  
+  - [Riesgos específicos de la IA generativa](#riesgos-específicos-de-la-ia-generativa)  
+  - [Herramientas de mitigación en AWS](#herramientas-de-mitigación-en-aws)  
+- [4.2 Modelos Transparentes y Explicables 🔍](#42-modelos-transparentes-y-explicables-🔍)  
+  - [Fomentando la transparencia](#fomentando-la-transparencia)  
+  - [Herramientas para la explicabilidad](#herramientas-para-la-explicabilidad)  
+  - [Diseño centrado en el ser humano](#diseño-centrado-en-el-ser-humano)  
 
-LLMs como ChatGPT se basan en esta arquitectura.
-Una innovación clave es el mecanismo de autoatención, que permite al modelo ponderar la importancia de diferentes partes de la entrada, capturando así relaciones contextuales y dependencias a largo plazo.
-La arquitectura consiste en un codificador (que genera una representación vectorial o embedding para cada token) y un decodificador.
-Terminología Esencial
-Petición (Prompt): La entrada (instrucciones y contenido) que se envía a un modelo generativo para que genere un resultado.
-Inferencia: El proceso de usar un modelo entrenado para generar un resultado o "finalización" a partir de una petición.
-Token: Una unidad de información (palabra, carácter, etc.). El modelo usa un tokenizador para convertir texto humano en un vector de IDs de tokens.
-Vectores y Embeddings: Un vector es una lista de números que representa características de un concepto. Las incrustaciones (embeddings) son representaciones vectoriales que capturan el significado semántico de los tokens. Cuanto más cerca están dos vectores en el espacio, más similar es su significado.
-Aprendizaje en Contexto (In-context learning): Técnica para mejorar la respuesta del modelo incluyendo ejemplos de la tarea deseada directamente en la petición (prompt).
-Tipos de Modelos y Casos de Uso
-Unimodal vs. Multimodal:
+---
 
-Unimodal: Trabaja con un solo tipo de datos, como los LLM que solo usan texto.
-Multimodal: Procesa y genera varios tipos de datos combinados (texto, imagen, video, audio), permitiendo un razonamiento más complejo.
-Modelos de Difusión:
+## 4.1 Desarrollo de Sistemas de IA Responsable 🛡️
 
-Son una clase de modelos generativos que aprenden a revertir un proceso de ruido para crear un resultado de alta calidad, como una imagen.
-Tienden a producir resultados de mayor calidad y son más estables de entrenar que otras arquitecturas como las GANs.
-Ejemplos incluyen Stable Diffusion, DALL-E y Midjourney.
-Casos de Uso Principales:
+Esta sección aborda cómo construir sistemas de IA justos y fiables, identificando y mitigando sesgos y riesgos.
 
-Generación y resumen de texto.
-Generación de código fuente para acelerar el desarrollo de software.
-Extracción de información, chatbots, traducción y motores de recomendación.
-2.2 Capacidades y Limitaciones para Negocios 📈
-Esta sección explora las ventajas, los riesgos y las métricas para evaluar la IA generativa en un contexto empresarial.
+### El desafío del sesgo y la fiabilidad
+- Sesgo (Bias): desequilibrios en los datos o diferencias de rendimiento de un modelo entre distintos grupos.  
+  - Un conjunto de datos desequilibrado puede provocar errores y predicciones inexactas para ciertos grupos.
 
-Ventajas Empresariales
-Simplicidad y Accesibilidad: La IA generativa hace que muchas aplicaciones de IA sean más sencillas y rápidas de crear a un menor coste.
-Adaptabilidad: Se puede aplicar a muchas tareas y dominios diferentes sin necesidad de un reentrenamiento completo.
-Limitaciones y Riesgos
-Alucinaciones: El modelo puede inventar información de forma convincente cuando no conoce la respuesta correcta. Es crucial contrastar las respuestas con fuentes autorizadas.
-Contenido Dañino y Sesgos: Los modelos se entrenan con datos masivos de internet, por lo que pueden reproducir lenguaje tóxico, sesgos o información peligrosa.
-Falta de Memoria: Un LLM no recuerda conversaciones anteriores por defecto; cada petición es tratada de forma independiente.
-Razonamiento y Matemáticas: Tienen una capacidad limitada para el razonamiento complejo y las matemáticas.
-Evaluación y Selección de Modelos
-Métricas de Evaluación:
+### Amazon SageMaker Clarify
+Amazon SageMaker Clarify es la herramienta clave de AWS para mitigar sesgos. Ayuda a:
+- Detectar sesgos:
+  - Antes del entrenamiento (en los datos).
+  - Después del entrenamiento.
+  - En modelos ya desplegados.
+- Mejorar la explicabilidad: trata el modelo como "caja negra" para determinar la importancia relativa de cada característica en una predicción.
 
-Evaluar LLMs es complejo porque su salida no es determinista.
-ROUGE (Recall-Oriented Understudy for Gisting Evaluation): Se usa para evaluar la calidad de resúmenes de texto.
-BLEU (Bilingual Evaluation Understudy): Se usa para evaluar la calidad de traducciones automáticas.
-Técnicas de Mejora:
+### Métricas de sesgo clave
+SageMaker Clarify mide diferentes tipos de sesgo, por ejemplo:
+- Disparidad demográfica: indica si un grupo tiene una proporción de resultados negativos mayor que la de resultados positivos.
+- Diferencia de exactitud: mide la diferencia en la precisión del modelo entre distintas clases o grupos.
+- Igualdad de trato: evalúa si la proporción de falsos negativos y falsos positivos difiere entre clases (puede indicar sesgo aun cuando la exactitud global sea similar).
 
-Refinamiento (Fine-tuning): Entrenar aún más un modelo pre-entrenado con datos específicos para mejorar su rendimiento en una tarea concreta.
-Aprendizaje por Refuerzo a partir de Comentarios Humanos (RLHF): Una técnica de refinamiento para alinear mejor el comportamiento del modelo con las preferencias humanas y aumentar la amabilidad, honestidad e inocuidad.
-Métricas Empresariales Clave (KPIs):
+### Riesgos específicos de la IA generativa
+- Alucinaciones: el modelo inventa información que parece real pero es falsa; puede tener consecuencias graves (ej.: citas o hechos fabricados).
+- Derechos de autor y propiedad intelectual: obras generadas por IA pueden no ser protegibles por derechos de autor; además, los modelos pueden generar contenido derivado de material protegido con el que fueron entrenados.
+- Resultados discriminatorios: sesgos en los modelos pueden llevar a trato injusto y riesgos legales (ej.: sistemas de selección de personal que discriminan por edad).
+- Contenido tóxico: modelos pueden generar contenido ofensivo, dañino u obsceno si tales ejemplos estuvieron en sus datos de entrenamiento.
+- Privacidad de los datos: PII u otra información confidencial presente en datos de entrenamiento o en peticiones puede filtrarse en las salidas del modelo.
 
-Para medir el éxito de una aplicación de IA, se deben usar métricas como la calidad de los resultados (relevancia, exactitud), la eficiencia (tasas de finalización de tareas), el retorno de la inversión (ROI) y el valor del ciclo de vida del cliente (CLTV).
-2.3 Infraestructura y Tecnologías de AWS ☁️
-Esta sección describe los servicios y la infraestructura que AWS ofrece para construir aplicaciones de IA generativa.
+### Herramientas de mitigación en AWS
+- Barreras de protección en Amazon Bedrock (Guardrails):  
+  - Configuración de filtros que bloquean contenido inapropiado en peticiones y respuestas.  
+  - Definición de umbrales para temas como odio, insultos, contenido sexual y violencia, o bloqueo total de determinados temas.
+- Evaluación de LLMs con SageMaker Clarify: permite comparar modelos en dimensiones clave para asegurar fiabilidad:
+  - Estereotipos: probabilidad de que el modelo reproduzca sesgos (raza, género, religión, etc.).
+  - Toxicidad: detección de contenido ofensivo, grosero, odioso o agresivo.
+  - Conocimiento fáctico: comprobación de veracidad de las respuestas.
+  - Solidez semántica: evaluación de si pequeñas alteraciones en la entrada (errores tipográficos, espacios) cambian el resultado.
+  - Exactitud: comparación del resultado del modelo con respuestas esperadas.
 
-La Pila de IA Generativa de AWS
-AWS divide su oferta en tres capas clave:
+---
 
-Capa Inferior (Infraestructura):
+## 4.2 Modelos Transparentes y Explicables 🔍
 
-Proporciona hardware especializado para entrenamiento e inferencia, como los chips AWS Trainium y AWS Inferentia, y seguridad a nivel de hardware con AWS Nitro System.
-Capa Intermedia (Herramientas y Modelos):
+Esta sección se centra en la importancia de entender cómo funcionan los modelos de IA y en herramientas que promueven la confianza y la participación humana.
 
-Permite acceder a modelos y herramientas para construir y escalar aplicaciones. Aquí se encuentra Amazon SageMaker.
-Capa Superior (Aplicaciones):
+### Fomentando la transparencia
+- Software de código abierto:  
+  - El desarrollo abierto maximiza la transparencia porque el funcionamiento interno es público.  
+  - La diversidad de desarrolladores ayuda a detectar y reducir sesgos.  
+  - Nota: algunas empresas limitan el uso por motivos de seguridad.
+- Tarjetas de Servicio de IA de AWS (AI Service Cards):  
+  - Documentos que centralizan información sobre el uso responsable de servicios de IA (ej.: Amazon Rekognition, Textract, Titan).  
+  - Incluyen casos de uso previstos, limitaciones y mejores prácticas.
+- Fichas de modelo de SageMaker (SageMaker Model Cards):  
+  - Permiten documentar el ciclo de vida de los modelos (detalles de entrenamiento, conjuntos de datos, contenedores usados).
 
-Incluye servicios que usan los FM para tareas específicas, como la generación de código o contenido.
-Servicios Clave de AWS para IA Generativa
-Amazon Bedrock:
+### Herramientas para la explicabilidad
+- SageMaker Clarify (explicabilidad):  
+  - Valores de Shapley (SHAP): asignan una puntuación a cada característica para determinar su contribución a la predicción.  
+  - Gráficos de dependencia parcial: muestran cómo varían las predicciones al cambiar el valor de una característica específica (p. ej., edad).
 
-Un servicio totalmente administrado que ofrece acceso a una variedad de modelos fundacionales (de Amazon y terceros como Cohere, Stability AI) a través de una única API.
-Permite experimentar con diferentes modelos en sus "zonas de juego" (Playgrounds) para encontrar el más adecuado para un caso de uso.
-PartyRock es una zona de juegos de Bedrock que facilita la creación de aplicaciones de IA generativa para aprender sus fundamentos.
-Amazon SageMaker JumpStart:
+### Diseño centrado en el ser humano
+- IA centrada en el ser humano: enfoque de diseño que prioriza necesidades y valores humanos; busca mejorar capacidades humanas en lugar de reemplazarlas. Involucra colaboración multidisciplinaria (psicólogos, especialistas en ética, etc.).
+- Amazon Augmented AI (A2I): servicio que incorpora revisión humana en el flujo de trabajo de la IA:
+  - Permite enviar predicciones con baja confianza (o muestras aleatorias para auditoría) a revisores humanos antes de entregarlas al cliente.
+- Aprendizaje por Refuerzo a partir de la Retroalimentación Humana (RLHF):  
+  - Técnica para alinear modelos de lenguaje con preferencias humanas.  
+  - Consiste en entrenar un "modelo de recompensa" con clasificaciones humanas y luego ajustar el LLM para maximizar la puntuación de dicho modelo de recompensa.
+- Amazon SageMaker Ground Truth: puede usarse para recopilar las preferencias humanas necesarias para entrenar el modelo de recompensa en RLHF.
 
-Actúa como un centro de modelos (model hub) que facilita el despliegue y refinamiento de modelos fundacionales de código abierto.
-Proporciona recursos como cuadernos de ejemplo y blogs para acelerar el desarrollo.
-Amazon Titan:
-
-Es la familia de modelos fundacionales creada por Amazon, disponible a través de Bedrock.
-Amazon Q Developer (antes CodeWhisperer):
-
-Un asistente de codificación con IA que genera sugerencias de código en tiempo real, desde fragmentos hasta funciones completas.
-Ventajas y Consideraciones de Coste
-Beneficios de AWS: Usar AWS para IA generativa ofrece ventajas como accesibilidad, rentabilidad, seguridad de nivel empresarial, conformidad y rapidez en la comercialización.
-
-Modelos de Precios:
-
-Alojar tu propio modelo: Implica pagar por la infraestructura de computación (GPU) y, a veces, una licencia por el modelo. Requiere inversión y mantenimiento.
-Pago por Token: Se paga según el número de tokens procesados (tanto en la entrada como en la salida). Es un modelo escalable ofrecido por servicios como Bedrock.
-Optimización de Costes: Es fundamental eliminar los puntos de enlace (endpoints) de los modelos de SageMaker cuando no se usan y seguir las prácticas recomendadas de supervisión de costes.
-
+---
